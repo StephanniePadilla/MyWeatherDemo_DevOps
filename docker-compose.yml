@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  myweatherdemo_dev:
+    container_name: myweatherdemo_dev
+    image: cloudblueconnect/connect-extension-runner:23.7
+    command: cextrun -d
+    volumes: 
+      - .:/extension
+    env_file:
+      - .myweatherdemo_dev.env
+
+  myweatherdemo_bash:
+    container_name: myweatherdemo_bash
+    image: cloudblueconnect/connect-extension-runner:23.7
+    working_dir: /extension
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/extension
+    env_file:
+      - .myweatherdemo_dev.env
+
+  myweatherdemo_test:
+    container_name: myweatherdemo_test
+    image: cloudblueconnect/connect-extension-runner:23.7
+    working_dir: /extension
+    command: /bin/bash -c "poetry install && pytest --verbose --cov=connect_myweatherdemo --cov-report=html --cov-report=term-missing:skip-covered"
+    volumes:
+      - .:/extension
+    env_file:
+      - .myweatherdemo_dev.env
