@@ -137,7 +137,35 @@ class MyweatherdemoExtension(Extension):
         return ProcessingResponse.done()
 
     def process_asset_cancel_request(self, request):
-        self.logger.info(f"Obtained request with id {request['id']}")
+        self.logger.info(
+            f"Received event for request {request['id']} "
+            f"in status {request['status']}"
+        )
+
+        if request['status'] == 'pending':
+            for param in request['asset']['params']:
+                if (param['id'] == 'id'):
+                        companyid = param['value']
+
+            self.logger.info(
+                    f"The company id is: {companyid}"
+            )
+
+            company = {
+
+            }
+
+            self.logger.info(
+                    f"The company to delete is: {company}"
+            )
+
+            template_id = self.config['ASSET_REQUEST_APPROVE_TEMPLATE_ID']
+            self.approve_asset_request(request, template_id)
+
+            session = requests.Session()
+            session.headers.update({'content-type': 'application/json', 'x-provider-token': 'osamwd'})
+            vendorResponse = session.delete('http://myweatherdemo.learn-cloudblue.com/api/company/'+companyid, data = json.dumps(company))
+
         return ProcessingResponse.done()
 
     def process_asset_adjustment_request(self, request):
