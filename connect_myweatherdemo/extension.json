@@ -29,14 +29,6 @@
       "approved",
       "failed"
     ],
-    "asset_adjustment_request_processing": [
-      "draft",
-      "tiers_setup",
-      "pending",
-      "inquiring",
-      "approved",
-      "failed"
-    ],
     "asset_purchase_request_validation": [
       "draft",
       "tiers_setup",

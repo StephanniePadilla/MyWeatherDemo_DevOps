@@ -168,10 +168,6 @@ class MyweatherdemoExtension(Extension):
 
         return ProcessingResponse.done()
 
-    def process_asset_adjustment_request(self, request):
-        self.logger.info(f"Obtained request with id {request['id']}")
-        return ProcessingResponse.done()
-
     def validate_asset_purchase_request(self, request):
         self.logger.info(f"Obtained request with id {request['id']}")
         return ValidationResponse.done(request)
