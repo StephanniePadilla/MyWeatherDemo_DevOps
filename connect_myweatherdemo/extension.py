@@ -90,49 +90,57 @@ class MyweatherdemoExtension(Extension):
         return ProcessingResponse.done()
 
     def process_asset_change_request(self, request):
-        for item in request['asset']['items']:
-            if (item['mpn'] == 'citieslimit'):
-                    citieslimit = item['quantity']
+        self.logger.info(
+            f"Received event for request {request['id']} "
+            f"in status {request['status']}"
+        )
 
-        if (citieslimit == 0):
-            #reason = 'it is not allowed to set 0 for the citieslimit'
-            reason = {
-                'it is not allowed to set 0 for the citieslimit'
+        if request['status'] == 'pending':
+            for item in request['asset']['items']:
+                if (item['mpn'] == 'citieslimit'):
+                        citieslimit = item['quantity']
+
+            if (citieslimit == 0):
+                #reason = 'it is not allowed to set 0 for the citieslimit'
+                reason = {
+                    'it is not allowed to set 0 for the citieslimit'
+                }
+
+                session = requests.Session()
+                session.headers.update({'content-type': 'application/json', 'ApiKey SU-328-329-171': 'dd6bcfceca89405ac54140ca485316f4edb2c618'})
+                session.post('https://api.connect.cloudblue.com/public/v1/requests/'+request["id"]+'/fail', data = json.dumps(reason))
+            
+            for param in request['asset']['params']:
+                if (param['id'] == 'id'):
+                        companyid = param['value']
+
+            self.logger.info(
+                    f"The company id is: {companyid}"
+            )
+
+            limit = {
+                'citieslimit': citieslimit
             }
 
+            self.logger.info(
+                    f"The new limit is: {limit}"
+            )
+
             session = requests.Session()
-            session.headers.update({'content-type': 'application/json', 'ApiKey SU-328-329-171': 'dd6bcfceca89405ac54140ca485316f4edb2c618'})
-            session.post('https://api.connect.cloudblue.com/public/v1/requests/'+request["id"]+'/fail', data = json.dumps(reason))
-        
-        for param in request['asset']['params']:
-            if (param['id'] == 'id'):
-                    companyid = param['value']
+            session.headers.update({'content-type': 'application/json', 'x-provider-token': 'osamwd'})
+            vendorResponse = session.put('http://myweatherdemo.learn-cloudblue.com/api/company/'+companyid, data = json.dumps(limit))
 
-        self.logger.info(
-                f"The company id is: {companyid}"
-        )
-
-        limit = {
-            'citieslimit': citieslimit
-        }
-
-        self.logger.info(
-                f"The new limit is: {limit}"
-        )
-
-        session = requests.Session()
-        session.headers.update({'content-type': 'application/json', 'x-provider-token': 'osamwd'})
-        vendorResponse = session.put('http://myweatherdemo.learn-cloudblue.com/api/company/'+companyid, data = json.dumps(limit))
-
-        self.logger.info(
-                f"Received vendor response as: {vendorResponse.content}"
-        )
-        
-        vendorData = vendorResponse.json() 
-        
-        if (vendorData['citieslimit'] == citieslimit):
-            template_id = self.config['ASSET_REQUEST_APPROVE_TEMPLATE_ID']
-            self.approve_asset_request(request, template_id)
+            self.logger.info(
+                    f"Received vendor response as: {vendorResponse.content}"
+            )
+            
+            vendorData = vendorResponse.json() 
+            
+            vendorDataInt = int(vendorData['citieslimit'])
+            citiesLimitInt = int(citieslimit)
+            if (vendorDataInt == citiesLimitInt):
+                template_id = self.config['ASSET_REQUEST_APPROVE_TEMPLATE_ID']
+                self.approve_asset_request(request, template_id)
 
         return ProcessingResponse.done()
 
