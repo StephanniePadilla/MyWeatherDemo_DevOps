@@ -131,7 +131,7 @@ class MyweatherdemoExtension(Extension):
         vendorData = vendorResponse.json() 
         
         if (vendorData['citieslimit'] == citieslimit):
-            emplate_id = self.config['ASSET_REQUEST_APPROVE_TEMPLATE_ID']
+            template_id = self.config['ASSET_REQUEST_APPROVE_TEMPLATE_ID']
             self.approve_asset_request(request, template_id)
 
         return ProcessingResponse.done()
